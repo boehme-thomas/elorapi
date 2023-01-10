@@ -1,0 +1,29 @@
+[package]
+name = "elorapi"
+version = "0.1.0"
+description = "Api to extend functionality of Chirpstack with rule execution."
+edition = "2021"
+author = "Thomas Böhme"
+
+[lib]
+name= "elorapi"
+path= "src/lib.rs"
+edition= "2021"
+crate-type= ["lib"]
+
+[dependencies]
+chirpstack_api = "3.11.1"
+tonic = "0.5.0"
+base64 = "0.13.0"
+hex = "0.4.3"
+serde_json = "1.0.81"
+serde = "1.0.137"
+serde_derive = "1.0.137"
+tokio = {version = "1.18.2", features = ["macros", "rt-multi-thread"]}
+prost-types = "0.8.0"
+regex = "1.5.6"
+paho-mqtt = "0.11.1"
+chrono = "0.4.19"
+
+[build-dependencies]
+tonic-build = "0.7.2"

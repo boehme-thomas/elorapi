@@ -1,0 +1,4 @@
+[env]
+OPENSSL_LIB_DIR = {value = "C:/Program Files/OpenSSL/lib", force = true}
+OPENSSL_INCLUDE_DIR = {value = "C:/Program Files/OpenSSL/include", force = true}
+OPENSSL_DIR = {value = "C:/Program Files/OpenSSL", force = true}

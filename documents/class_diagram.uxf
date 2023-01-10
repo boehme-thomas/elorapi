@@ -1,0 +1,256 @@
+<diagram program="umletino" version="15.0.0"><zoom_level>8</zoom_level><element><id>UMLClass</id><coordinates><x>640</x><y>120</y><w>544</w><h>184</h></coordinates><panel_attributes>DeviceProfile
+-
+-id:String
+-
++new(id: &amp;str, uplink:Uplink [0..1], downlink:Downlink [0..1]): DeviceProfile
++load_device_profile(device_profile_id:&amp;str, connection: Connection): Result&lt;DeviceProfile, Error&gt; &lt;&lt;async&gt;&gt;
++get_downlink():Downlink [0..1]
++read_downlink(file:&amp;str):Result&lt;(), io::Error&gt;
++get_uplink():Uplink [0..1]
++read_uplink(file:&amp;str):Result&lt;(), Error&gt;
++read_specification(file: &amp;str, network_server_id:i64, organization_id:i64): Result&lt;DeviceProfile, Error&gt;
+-establish_connection(connection:Connection):Result&lt;DeviceProfileServiceClient&lt;Channe&gt; [0..1], Error&gt; &lt;&lt;async&gt;&gt;
++add_clinet(client: DeviceProfileServiceClient&lt;Channel&gt; [0..1])
++write_device_profile(connection:Connection):Result&lt;(), Error&gt; &lt;&lt;async&gt;&gt;
++print_downlink()
++print_uplink()</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>648</x><y>392</y><w>552</w><h>128</h></coordinates><panel_attributes>Downlink
+-
+-hex_pre_byte: String
+-combined_work_load_count: bool
+-
++new(hex_pre_byte: &amp;str, combined_work_load_count: bool, payloads: DownlinkPayload [0..*]): Downlink
++get_payloads():DownlinkPayload [0..*]
++add_new_payload(command_name: &amp;str, description: &amp;str, configurable:bool, hex_code:&amp;str)
++add_payload(downlink_payload: DownlinkPayload)
++get_hex_pre_byte(): String
++get_combinded_work_load_count(): bool</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>800</x><y>296</y><w>64</w><h>112</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m2=0..1
+-downlink</panel_attributes><additional_attributes>10;10;10;120</additional_attributes></element><element><id>UMLClass</id><coordinates><x>648</x><y>584</y><w>560</w><h>136</h></coordinates><panel_attributes>DownlinkPayload
+-
+-command_name: String
+-description: String
+-configuration: bool
+-hex_code: String
+-
++new(command_name: &amp;str, description: &amp;str, configuration: bool, hex_code: &amp;str): DownlinkPayload
++is_configurable():bool
++get_description(): String
++get_command_name(): String
++get_hex_code(): String</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>800</x><y>512</y><w>64</w><h>88</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m2=0..*
+-payloads</panel_attributes><additional_attributes>10;10;10;90</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1472</x><y>208</y><w>480</w><h>88</h></coordinates><panel_attributes>Device
+--
+--
++new(chirpstack_device:GetDeviceResponse):Device
++get_chirpstack_device():GetDeviceResponse
+-establish_connection(connection:Connection):Result&lt;DeviceServiceClient&lt;Chanel&gt; [0..1], Error&gt; &lt;&lt;async&gt;&gt;
++load_device(dev_eui:&amp;str, connection:Connection):Result&lt;Device, Error&gt; &lt;&lt;async&gt;&gt;
+-add_client(client: DeviceServiceClient&lt;Channel&gt; [0..1])
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>32</x><y>592</y><w>312</w><h>120</h></coordinates><panel_attributes>Connection
+-
+-api_token:String
+-uri:String
+-
++new(api_token:&amp;str, uri:&amp;str):Connection
++get_uri():String
++change_uri(uri:&amp;str)
++get_api_token():String
++set_api_token(api_token:&amp;str)</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>632</x><y>0</y><w>488</w><h>48</h></coordinates><panel_attributes>&lt;&lt;external&gt;&gt;
+chirpstack_api::as_pb::external::api::device_profile_service_client::DeviceProfileServiceClient
+-
+...</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1144</x><y>0</y><w>272</w><h>48</h></coordinates><panel_attributes>&lt;&lt;external&gt;&gt;
+chirpstack_api::as_pb::external::api::DeviceProfile
+// in our context ChrisptackDeviceProfile
+-
+...</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>776</x><y>40</y><w>48</w><h>96</h></coordinates><panel_attributes>lt=&lt;-
+m1=0..1
+-client
+</panel_attributes><additional_attributes>10;10;10;100</additional_attributes></element><element><id>Relation</id><coordinates><x>1160</x><y>40</y><w>64</w><h>96</h></coordinates><panel_attributes>lt=&lt;-
+m1=0..1
++dev_prof
+</panel_attributes><additional_attributes>10;10;10;100</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1200</x><y>960</y><w>896</w><h>152</h></coordinates><panel_attributes>RuleContainer
+--
+--
++new():RuleContainer
++add_rule(rule:Rule)
++get_rules():Rule [0..*]
++get_client():DeviceQueueServiceClient&lt;Channel&gt; [0..1]
++start_rule_execution(arc_rule:Rule, receiver:Receiver&lt;Message&gt;, dev_profile_container:DeviceProfileContainer, client:DeviceQueueServiceClient&lt;Channel&gt;, connection:Connection):JoinHandle&lt;()&gt;
+-extract_data(message:String):Result&lt;Value, Error&gt;
+-message(message:Message [0..*], device:Device):String
++establish_connection(connection:Connection):Result&lt;(), Error&gt; &lt;&lt;async&gt;&gt;
+-enqueue_message(client:DeviceQueueServiceClient&lt;Channel&gt;, dev_eui:String, f_port:u32, data:String, connection:Connection):Result&lt;(), Error&gt; &lt;&lt;async&gt;&gt;
++stop_rule_execution(arc_rule:Rule)</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1464</x><y>768</y><w>376</w><h>80</h></coordinates><panel_attributes>Rule
+--
+-bool_ops:String [0..*]
+-running:bool
+--
++new(conditions:Condition [0..*], bool_ops: String[0..*], actions:Action[0..*]):Rule
++is_running()</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1640</x><y>840</y><w>48</w><h>136</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m2=0..*
+-rules</panel_attributes><additional_attributes>10;150;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1200</x><y>1168</y><w>592</w><h>176</h></coordinates><panel_attributes>RuleGenerator
+--
+--
+-decision():Result&lt;bool, ()&gt;
+-select_data_time:Result&lt;TimeCondition, ()&gt;
+-select_device(dev_container:DeviceContainer):Result&lt;Device, ()&gt;
+-selelct_uplink(device_profile:DeviceProfile):Result&lt;usize, ()&gt;
+-select_operator(uplink:usize, device_profile:DeviceProfile):Result&lt;String, ()&gt;
+-select_threshold(uplink:usize, device_profile:DeviceProfile, dev_container:DeviceContainer): Result&lt;RefValue, ()&gt;
+-select_bool_op():Result&lt;String, ()&gt;
+-select_downlink(device_profile: DeviceProfile):Result&lt;usize [0..*], ()&gt;
+-select_f_prot():Result&lt;u32, ()&gt;
+-downlink_message(device_profile:DeviceProfile, payload_indices:usize [0..*]):String
++start_rule_generator(dev_container:DeviceContainer, dev_prof_container: DeviceProfileContainer, rule_container:RuleContainer)
+-end_rule_generator()
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1752</x><y>536</y><w>112</w><h>96</h></coordinates><panel_attributes>&lt;&lt;enum&gt;&gt;
+RefValue
+--
+IntNumber(i32)
+String(String)
+FloatNumber(f32)
+Bool(bool)
+Uplink((Device, usize))</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>0</x><y>136</y><w>608</w><h>136</h></coordinates><panel_attributes>DeviceProfileContainer
+--
+--
++new():DeviceProfileContainer
++add_device_profile(device_profile:DeviceProfile)
++get_device_profile_index_via_dev_prof_id(dev_prof_id: &amp;str):Result&lt;usize, Error&gt;
++get_device_profiles():DeviceProfile [0..*]
++establish_connection(connection: Connection):Result&lt;(), Error&gt; &lt;&lt;async&gt;&gt;
++load_chirpstack_device_profiles(limit:i64, organization_id:i64, application_id:i64, connection:Connection):Result&lt;(), Error&gt; &lt;&lt;async&gt;&gt;
++get_chirpstack_device_profiles():DeviceProfileListItem [0..*]
++print_list_items()
++print_device_profiles()
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>504</x><y>264</y><w>208</w><h>96</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m2=0..*
+-device_profiles</panel_attributes><additional_attributes>10;10;10;100;220;100;220;50</additional_attributes></element><element><id>UMLClass</id><coordinates><x>80</x><y>368</y><w>312</w><h>48</h></coordinates><panel_attributes>&lt;&lt;external&gt;&gt;
+chirpstack_api::as_pb::external::api::DeviceProfileListItem
+--
+...</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>224</x><y>264</y><w>144</w><h>120</h></coordinates><panel_attributes>lt=&lt;-
+-chirpstack_device_profiles
+m1=0..*</panel_attributes><additional_attributes>10;130;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>152</x><y>8</y><w>496</w><h>144</h></coordinates><panel_attributes>lt=&lt;-
+m1=0..1
+-client
+</panel_attributes><additional_attributes>600;20;10;20;10;160</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1248</x><y>216</y><w>168</w><h>80</h></coordinates><panel_attributes>Uplink
+--
+-payload:String [0..*]
+--
++new(payloads:String [0..*]):Uplink
++add_payload(payload_str:&amp;str)
++get_payloads():String [0..*]</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1128</x><y>288</y><w>176</w><h>64</h></coordinates><panel_attributes>lt=-&gt;&gt;&gt;&gt;&gt;
+m1=0..1
+-uplink	</panel_attributes><additional_attributes>180;10;180;60;10;60;10;20</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1472</x><y>0</y><w>488</w><h>128</h></coordinates><panel_attributes>DeviceContainer
+--
+--
++new():DeviceContainer
++get_device(index:usize):Result&lt;Device, Error&gt;
++get_chirpstack_device_list():DeviceListItem [0..*]
++add_device(device:Device)
++establish_connection(connection: Connection:Result&lt;(), Error&gt; &lt;&lt;async&gt;&gt;
++load_chirpstack_deivce_list(limit:i64, application_id:i64, connection:Connection):Result&lt;(), Error&gt; &lt;&lt;async&gt;&gt;
++print_list_items()
++print_devices()</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1688</x><y>120</y><w>56</w><h>104</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+-devices
+m2=0..*</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2216</x><y>16</y><w>368</w><h>48</h></coordinates><panel_attributes>&lt;&lt;external&gt;&gt;
+chirpstack_api::as_pb::external::api::device_service_client::DeviceServiceClient
+--
+...</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>2216</x><y>80</y><w>280</w><h>48</h></coordinates><panel_attributes>&lt;&lt;external&gt;&gt;
+chirpstack_api::as_pb::external::api::DeviceListItem
+--
+...</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1952</x><y>88</y><w>280</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
+-chirpstack_device_list
+m1=0..*</panel_attributes><additional_attributes>330;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>1952</x><y>16</y><w>280</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
+-client
+m1=0..1</panel_attributes><additional_attributes>330;20;10;20</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2216</x><y>200</y><w>376</w><h>48</h></coordinates><panel_attributes>&lt;&lt;external&gt;&gt;
+chirpstack_api::as_pb::external::api:device_service_client::DeviceServiceClient
+--
+...</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>2216</x><y>264</y><w>264</w><h>48</h></coordinates><panel_attributes>&lt;&lt;external&gt;&gt;
+chirpstack_api::as_pb::external::api::GetDeviceResponse
+--
+...</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1944</x><y>272</y><w>288</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
+-chirpstack_device
+m1=1</panel_attributes><additional_attributes>340;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>1944</x><y>216</y><w>288</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
+-client
+m1=0..1</panel_attributes><additional_attributes>340;20;10;20</additional_attributes></element><element><id>UMLClass</id><coordinates><x>32</x><y>728</y><w>272</w><h>152</h></coordinates><panel_attributes>Mqtt
+-
+-uri:String
+-username:String
+-password:String
+-
++new(uri:&amp;str, username:&amp;str, password:&amp;str): Mqtt
++get_uri():String
++change_uri(uri:&amp;str)
++change_username(username:&amp;str)
++change_password(password:&amp;str)
++start_receiving(): Result&lt;Receiver&lt;Message&gt;, Error&gt;
+-create_client(): Result&lt;Client, Error&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>424</x><y>40</y><w>104</w><h>56</h></coordinates><panel_attributes>0..1 multiplicity 
+implemented as
+Option&lt;T&gt; in Rust 
+bg=yellow</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>520</x><y>32</y><w>104</w><h>48</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;40;110;40;110;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>696</x><y>1016</y><w>424</w><h>48</h></coordinates><panel_attributes>&lt;&lt;external&gt;&gt;
+chirpstack_api::as_pb::external::api::device_queue_service_client::DeviceQueueServiceClient
+--
+...</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1112</x><y>1016</y><w>104</w><h>40</h></coordinates><panel_attributes>lt=-&gt;
+-client
+m2=0..1</panel_attributes><additional_attributes>110;20;10;20</additional_attributes></element><element><id>UMLNote</id><coordinates><x>1760</x><y>880</y><w>104</w><h>56</h></coordinates><panel_attributes>As mutex
+implemented as 
+Arc&lt;Mutex&lt;Rule&gt; &gt;
+bg=yellow</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1672</x><y>896</y><w>104</w><h>24</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>110;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1968</x><y>760</y><w>128</w><h>64</h></coordinates><panel_attributes>&lt;&lt;enum&gt;&gt;
+Codition
+--
+Device(DeviceCondition)
+Time(TimeCondition)</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1744</x><y>408</y><w>448</w><h>64</h></coordinates><panel_attributes>DeviceCondition
+--
+-measure_data: usize
+-operator: String
+--
++new(device:Device, measure_data: usize, operator: String, threshold: RefValue):DeviceCondition
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1768</x><y>464</y><w>72</w><h>88</h></coordinates><panel_attributes>lt=&lt;-
+m1=1
+-threshold</panel_attributes><additional_attributes>10;90;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1832</x><y>288</y><w>56</w><h>136</h></coordinates><panel_attributes>lt=&lt;-
+m1=1
+-device</panel_attributes><additional_attributes>10;10;10;150</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2216</x><y>432</y><w>448</w><h>40</h></coordinates><panel_attributes>TimeCondition
+--
+--
++new(weekday:Weekday [0..1], timespan_start:NaiveTime, timespan_end:NaiviTime):TimeCondition</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>2416</x><y>544</y><w>88</w><h>48</h></coordinates><panel_attributes>&lt;&lt;external&gt;&gt;
+chrono::Weekday
+--
+...</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>2272</x><y>544</y><w>96</w><h>48</h></coordinates><panel_attributes>&lt;&lt;external&gt;&gt;
+chrono::NaiveTime
+--
+...</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>2312</x><y>464</y><w>72</w><h>96</h></coordinates><panel_attributes>lt=&lt;-
+m1=2
+-timespan</panel_attributes><additional_attributes>10;100;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>2448</x><y>464</y><w>64</w><h>96</h></coordinates><panel_attributes>lt=&lt;-
+m1=0..1
+-weekday</panel_attributes><additional_attributes>10;100;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1328</x><y>384</y><w>384</w><h>88</h></coordinates><panel_attributes>Action
+--
+payload_indices:usize [0..*]
+message:String
+f_port: u32
+--
++new(device:Device, payload_indices:usize [0..*], message:String, f_port:u32):Action</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1528</x><y>288</y><w>56</w><h>112</h></coordinates><panel_attributes>lt=&lt;-
+m1=1
+-device</panel_attributes><additional_attributes>10;10;10;120</additional_attributes></element><element><id>Relation</id><coordinates><x>1496</x><y>464</y><w>56</w><h>320</h></coordinates><panel_attributes>lt=&lt;-
+m1=0..*
+-actions</panel_attributes><additional_attributes>13;10;10;380</additional_attributes></element><element><id>Relation</id><coordinates><x>1984</x><y>464</y><w>56</w><h>312</h></coordinates><panel_attributes>lt=&lt;.
+&lt;&lt;uses&gt;&gt;</panel_attributes><additional_attributes>10;10;10;370</additional_attributes></element><element><id>Relation</id><coordinates><x>2088</x><y>464</y><w>192</w><h>328</h></coordinates><panel_attributes>lt=&lt;.
+&lt;&lt;uses&gt;&gt;</panel_attributes><additional_attributes>180;10;180;390;10;390</additional_attributes></element><element><id>Relation</id><coordinates><x>1832</x><y>776</y><w>152</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
+m1=0..*
+-conditions</panel_attributes><additional_attributes>170;20;10;20</additional_attributes></element><element><id>UMLClass</id><coordinates><x>264</x><y>1016</y><w>264</w><h>56</h></coordinates><panel_attributes>&lt;&lt;trait&gt;&gt;
+/Operator/
+--
+--
+/-get_operator(operator:String):Result&lt;fn(&amp;T, &amp;T)-&gt;bool, ()&gt;/
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>432</x><y>1160</y><w>296</w><h>56</h></coordinates><panel_attributes>Operator&lt;i32&gt;
+--
+--
+-get_operator(operator:String):Result&lt;fn(&amp;i32, &amp;i32)-&gt; bool, ()&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>56</x><y>1160</y><w>296</w><h>56</h></coordinates><panel_attributes>Operator&lt;f32&gt;
+--
+--
+-get_operator(operator:String):Result&lt;fn(&amp;f32, &amp;f32)-&gt; bool, ()&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>40</x><y>1248</y><w>312</w><h>56</h></coordinates><panel_attributes>Operator&lt;bool&gt;
+--
+--
+-get_operator(operator:String):Result&lt;fn(&amp;bool, &amp;bool)-&gt; bool, ()&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>432</x><y>1248</y><w>320</w><h>56</h></coordinates><panel_attributes>Operator&lt;String&gt;
+--
+--
+-get_operator(operator:String):Result&lt;fn(&amp;String, &amp;String)-&gt; bool, ()&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>384</x><y>1064</y><w>24</w><h>232</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>10;10;10;270</additional_attributes></element><element><id>Relation</id><coordinates><x>344</x><y>1272</y><w>104</w><h>24</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;10;110;10</additional_attributes></element><element><id>Relation</id><coordinates><x>344</x><y>1184</y><w>104</w><h>24</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;10;110;10</additional_attributes></element></diagram>
