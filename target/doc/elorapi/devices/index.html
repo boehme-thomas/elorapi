@@ -1,0 +1,153 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="This module is for the management of devices and device profiles."><meta name="keywords" content="rust, rustlang, rust-lang, devices"><title>elorapi::devices - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../elorapi/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../elorapi/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"><a href="#">Module devices</a></h2><div class="sidebar-elems"><section><ul class="block"><li><a href="#structs">Structs</a></li></ul></section></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn">Module <a href="../index.html">elorapi</a>::<wbr><a class="mod" href="#">devices</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../../src/elorapi/devices.rs.html#1-715">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>This module is for the management of devices and device profiles.</p>
+<p>Note that it is necessary to establish a connection before loading data from or writing to the
+Chirsptack server. Beware that <a href="struct.DeviceProfileContainer.html#method.establish_connection"><code>DeviceProfileContainer::establish_connection</code></a>
+establishes another connection than <a href="struct.DeviceContainer.html#method.establish_connection"><code>DeviceContainer::establish_connection</code></a>,
+therefor these functions must be called in their respective cases.</p>
+<p>Also note that there is a difference between a <a href="struct.DeviceProfile.html"><code>DeviceProfile</code></a> and
+a <a href="https://docs.rs/chirpstack_api/3.11.1/chirpstack_api/as_pb/external/api/struct.DeviceProfileListItem.html"><code>DeviceProfileListItem</code></a>,
+which is here referred to as <em>chirpstack device profile</em>.<br/>
+The same applies to <a href="struct.Device.html"><code>Device</code></a>s and <a href="https://docs.rs/chirpstack_api/latest/chirpstack_api/as_pb/external/api/struct.DeviceListItem.html"><code>DeviceListItem</code></a>s,
+which are referred to as <em>chirpstack devices</em>.</p>
+<p>In the following the usage of this module will be described with an example.</p>
+<h2 id="example"><a href="#example">Example</a></h2>
+<ul>
+<li><a href="#startup">Startup</a></li>
+<li><a href="#creating-a-device-profile-with-a-specification-file">Creating a device profile with a specification file</a></li>
+<li><a href="#loading-existing-device-profile">Loading existing device profile</a></li>
+<li><a href="#loading-specification-to-an-existing-device-profile">Loading specification to an existing device profile</a></li>
+<li><a href="#loading-a-device">Loading a device</a></li>
+</ul>
+<h3 id="startup"><a href="#startup">Startup</a></h3>
+<p>It is necessary to create a device profile container and a device container.<br/>
+To read from or to write to the Chrisptack sever a <a href="../connections/struct.ChirpstackConnection.html"><code>ChirpstackConnection</code></a> is needed.
+For more information see the <a href="../connections/index.html">connections</a> module.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::sync::{Arc, Mutex};
+<span class="kw">use </span>elorapi::connections::ChirpstackConnection;
+<span class="kw">use </span>elorapi::devices::{DeviceContainer, DeviceProfileContainer};
+
+<span class="comment">// create a DeviceContainer
+</span><span class="kw">let </span>dev_container_arc_mutex = Arc::new(Mutex::new(DeviceContainer::new()));
+<span class="kw">let </span>dev_container_arc = Arc::clone(<span class="kw-2">&amp;</span>dev_container_arc_mutex);
+<span class="kw">let </span><span class="kw-2">mut </span>dev_container = dev_container_arc.lock().unwrap();
+
+<span class="comment">// creat a DeviceProfileContainer
+</span><span class="kw">let </span>dev_prof_container_arc_mutex = Arc::new(Mutex::new(DeviceProfileContainer::new()));
+<span class="kw">let </span>dev_prof_container_arc = Arc::clone(<span class="kw-2">&amp;</span>dev_prof_container_arc_mutex);
+<span class="kw">let </span><span class="kw-2">mut </span>dev_prof_container = dev_prof_container_arc.lock().unwrap();
+
+<span class="comment">// create a ChirpstackConnection
+</span><span class="kw">let </span>connection = ChirpstackConnection::new(<span class="string">&quot;API_Token&quot;</span>, <span class="string">&quot;server_uri&quot;</span>);</code></pre></div>
+<h3 id="creating-a-device-profile-with-a-specification-file"><a href="#creating-a-device-profile-with-a-specification-file">Creating a device profile with a specification file</a></h3>
+<p>To create a new device profile, it is possible to read all necessary specifications
+out of a json file. For that the network server id and the organization id,
+to which the profile should be written, is necessary. The ids can be seen in the Chirpstack application server.</p>
+<p>For more information about the specification files go to the <a href="../index.html#specification-files">specification files</a> paragraph.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>elorapi::devices::DeviceProfile;
+
+<span class="comment">// the network server id and the organization id
+</span><span class="kw">let </span>network_server_id = <span class="number">11</span>;
+<span class="kw">let </span>organization_id = <span class="number">1</span>;
+<span class="comment">// path of the specification file
+</span><span class="kw">let </span>path = <span class="string">&quot;./specification_file_path/specification_file.json&quot;</span>;
+
+<span class="comment">// read device profile out of specification file
+</span><span class="kw">let </span><span class="kw-2">mut </span>device_profile = DeviceProfile::read_specification(path, network_server_id, organization_id).unwrap();
+
+<span class="comment">// write the device profile to the Chirpstack server
+</span>device_profile.write_device_profile(connection.clone()).<span class="kw">await</span>.unwrap();
+
+<span class="comment">// add device profile to the container
+</span>dev_prof_container.add_device_profile(device_profile);</code></pre></div>
+<h3 id="loading-existing-device-profile"><a href="#loading-existing-device-profile">Loading existing device profile</a></h3>
+<p>It is possible to load existing device profiles out of the Chirpstack server.<br/>
+For this the following steps need to be done:</p>
+<ul>
+<li><strong>Establish a device profile container connection</strong><br/>
+Note that this is another connection than the Chirpstack connection.</li>
+</ul>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>dev_prof_container.establish_connection(connection.clone()).<span class="kw">await</span>.unwrap();</code></pre></div>
+<ul>
+<li><strong>Load chirpstack device profile</strong><br/>
+Note that <em>Chirpstack device profiles</em> should not be misunderstood as <a href="struct.DeviceProfile.html"><code>DeviceProfile</code></a>.<br/>
+It is only possible to load a specific number of device profiles from a specific organization and application.
+Therefor the specific ids must be given (this information can be seen in the Chirpstack application).</li>
+</ul>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// number of items and ids
+</span><span class="kw">let </span>limit = <span class="number">10</span>;
+<span class="kw">let </span>organization_id = <span class="number">1</span>;
+<span class="kw">let </span>application_id = <span class="number">1</span>;
+
+<span class="comment">// load the device profiles and add them to the container
+</span>dev_prof_container.load_chirpstack_device_profiles(limit, organization_id, application_id, connection.clone()).<span class="kw">await</span>.unwrap();</code></pre></div>
+<ul>
+<li><strong>Load actual device profile</strong><br/>
+After getting the chirpstack device profile the actual device profile can now be loaded.
+For this the device profile id is needed (to get this information, either print the item via
+<a href="struct.DeviceProfileContainer.html#method.print_list_items"><code>DeviceProfileContainer::print_list_items</code></a> or get all items
+via <a href="struct.DeviceProfileContainer.html#method.get_chirpstack_device_profiles"><code>DeviceProfileContainer::get_chirpstack_device_profiles</code></a> and then their id).</li>
+</ul>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code> <span class="kw">use </span>elorapi::devices::DeviceProfile;
+
+ <span class="comment">// get the device profile id of a chirpstack device list item
+ </span><span class="kw">let </span>device_profile_id = dev_prof_container.get_chirpstack_device_list()[<span class="number">0</span>].id;
+
+ <span class="comment">// load the actual device profile form chirpstack
+ </span><span class="kw">let </span>new_device_profile = DeviceProfile::load_device_profile(device_profile_id, connection.clone()).<span class="kw">await</span>.unwrap();
+
+ <span class="comment">// add the device profile to the container
+ </span>dev_prof_container.add_device_profile(new_device_profile);</code></pre></div>
+<h3 id="loading-specification-to-an-existing-device-profile"><a href="#loading-specification-to-an-existing-device-profile">Loading specification to an existing device profile</a></h3>
+<p>It is possible, for some cases even necessary,
+to load uplink and/or downlink specification/s via a specification file.
+It can be done directly after loading the device profile.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code> <span class="kw">use </span>elorapi::devices::DeviceProfile;
+
+ <span class="comment">// load device profile out from the server
+ </span><span class="kw">let </span><span class="kw-2">mut </span>new_device_profile = DeviceProfile::load_device_profile(<span class="string">&quot;device_profile_id&quot;</span>, connection.clone()).<span class="kw">await</span>.unwrap();
+ <span class="comment">// read the specification file for downlink, uplink or both
+ </span>new_device_profile.read_downlink(<span class="string">&quot;./specification_file_path/downlink_specification.json&quot;</span>).unwrap();
+ new_device_profile.read_uplink(<span class="string">&quot;./specification_file_path/uplink_specification.json&quot;</span>).unwrap();
+
+ <span class="comment">// add device profile to the container
+ </span>dev_prof_container.add_device_profile(new_device_profile);</code></pre></div>
+<p>It is also possible to load the specification after <a href="#loading-existing-device-profile">loading an existing device profile</a>.
+For this the index of the device profile in the container is needed.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// get the index of the device profile
+</span><span class="kw">let </span>index = dev_prof_container.get_device_profile_index_via_dev_prof_id(<span class="string">&quot;device_profile_id&quot;</span>).unwrap();
+<span class="comment">// now read the downlink or uplink specification file
+</span>dev_prof_container.get_device_profiles()[index].read_uplink(<span class="string">&quot;./specification_file_path/uplink_specification_file.json&quot;</span>).unwrap();</code></pre></div>
+<h3 id="loading-a-device"><a href="#loading-a-device">Loading a device</a></h3>
+<p>It is possible to load existing devices from the Chirpstack server.<br/>
+For this the following steps need to be done:</p>
+<ul>
+<li><strong>Establish a device container connection</strong></li>
+</ul>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code> <span class="comment">// establish a connection to the Chripstack server
+ </span>dev_container.establish_connection(connection.clone()).<span class="kw">await</span>.unwrap();</code></pre></div>
+<ul>
+<li><strong>Loading the actual device</strong><br/>
+It is only possible to load a specific number of items form a specific application.
+After loading the chirpstack devices to the container, get a device list item out of it and load the device.</li>
+</ul>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code> <span class="kw">use </span>elorapi::devices::Device;
+
+ <span class="comment">// load a limited list of devices in a specific application
+ </span><span class="kw">let </span>limit = <span class="number">10</span>;
+ <span class="kw">let </span>application_id = <span class="number">1</span>;
+ dev_container.load_chirpstack_device_list(limit, application_id, connection.clone()).<span class="kw">await</span>.unwrap();
+
+ <span class="comment">// get a device list item from the container
+ </span><span class="kw">let </span>device_list_item = dev_container.get_chirpstack_device_list().get(<span class="number">0</span>).unwrap();
+
+ <span class="comment">// load the device via its dev_eui
+ </span><span class="kw">let </span>device = Device::load_device(<span class="kw-2">&amp;</span>device_list_item.dev_eui, connection.clone()).<span class="kw">await</span>.unwrap();</code></pre></div>
+</div></details><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Device.html" title="elorapi::devices::Device struct">Device</a></div><div class="item-right docblock-short">The representation of a device.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.DeviceContainer.html" title="elorapi::devices::DeviceContainer struct">DeviceContainer</a></div><div class="item-right docblock-short">To manage <a href="struct.Device.html" title="Device"><code>Device</code></a>s.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.DeviceProfile.html" title="elorapi::devices::DeviceProfile struct">DeviceProfile</a></div><div class="item-right docblock-short">The representation of a device profile.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.DeviceProfileContainer.html" title="elorapi::devices::DeviceProfileContainer struct">DeviceProfileContainer</a></div><div class="item-right docblock-short">To manage <a href="struct.DeviceProfile.html" title="DeviceProfile"><code>DeviceProfile</code></a>s and <a href="https://docs.rs/chirpstack_api/3.11.1/chirpstack_api/as_pb/external/api/struct.DeviceProfileListItem.html">Chirpstack device profiles</a>.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Downlink.html" title="elorapi::devices::Downlink struct">Downlink</a></div><div class="item-right docblock-short">To store the structure of downlink messages of a <a href="struct.DeviceProfile.html" title="DeviceProfile"><code>DeviceProfile</code></a>.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.DownlinkPayload.html" title="elorapi::devices::DownlinkPayload struct">DownlinkPayload</a></div><div class="item-right docblock-short">To store the structure of downlink commands of a <a href="struct.DeviceProfile.html" title="DeviceProfile"><code>DeviceProfile</code></a> .</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Uplink.html" title="elorapi::devices::Uplink struct">Uplink</a></div><div class="item-right docblock-short">To store the labels of the uplink messages of a <a href="struct.DeviceProfile.html" title="DeviceProfile"><code>DeviceProfile</code></a>.</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="elorapi" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

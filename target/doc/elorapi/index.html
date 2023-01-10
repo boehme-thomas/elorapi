@@ -1,0 +1,130 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="This library provides functionality to extend the ChirpstackAPI version 3.11.1 with the ability to create device profiles with a specification file and to create and execute rules."><meta name="keywords" content="rust, rustlang, rust-lang, elorapi"><title>elorapi - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../normalize.css"><link rel="stylesheet" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../ayu.css" disabled><link rel="stylesheet" href="../dark.css" disabled><link rel="stylesheet" href="../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../storage.js"></script><script defer src="../crates.js"></script><script defer src="../main.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../elorapi/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div></a><h2></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../elorapi/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div></a><h2 class="location"><a href="#">Crate elorapi</a></h2><div class="sidebar-elems"><ul class="block"><li class="version">Version 0.1.0</li><li><a id="all-types" href="all.html">All Items</a></li></ul><section><ul class="block"><li><a href="#modules">Modules</a></li></ul></section></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn">Crate <a class="mod" href="#">elorapi</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../src/elorapi/lib.rs.html#1-464">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>This library provides functionality to extend the ChirpstackAPI version 3.11.1 with the ability to
+create device profiles with a specification file and to create and execute rules.</p>
+<p>Its main purpose is to create specific rules for one or more devices, that leads to actions on
+the same or different devices, when specific conditions are fulfilled. For an overview of a rule
+see <a href="#structure-of-a-rule">this</a> paragraph.</p>
+<h2 id="requirements"><a href="#requirements">Requirements</a></h2>
+<p>To use this library following requirements should be fulfilled:</p>
+<ul>
+<li>Working Chirpstack servers version 3.11.1 (<a href="https://www.chirpstack.io/">chirpstack.io</a>)</li>
+<li>LoRa messages have to be exchanged via Mqtt <br/> (should already be satisfied when the
+servers are working; this library was tested with a <a href="https://mosquitto.org/">mosquitto broker</a>)</li>
+<li>In the Mqtt configuration file, there have to exist a user that is allowed to sent messages
+and receive every incoming message, that contains payload data from a device.</li>
+<li>Uplink specification file, Downlink specification file and/or device profile specification file <br/>
+(for more information about specification files see <a href="#specification-files">this</a> paragraph).</li>
+<li>To be able to load and safe devices and device profiles, and to add a message to a device queue
+a unique API key is required! It can be generated in the Chirpstack application server
+(API keys &gt; create).</li>
+</ul>
+<h2 id="diagrams"><a href="#diagrams">Diagrams</a></h2>
+<p>In this section an overview of the <a href="#structure-of-a-rule">structure of a rule</a> and an <a href="#uml">uml diagram</a> of all methods is given.</p>
+<h3 id="structure-of-a-rule"><a href="#structure-of-a-rule">Structure of a rule</a></h3>
+<p><img src="../../../documents/rule_structure.png" alt="Image" /></p>
+<h3 id="uml"><a href="#uml">UML</a></h3>
+<p><img src="../../../documents/class_diagram.png" alt="Image" /></p>
+<h2 id="specification-files"><a href="#specification-files">Specification files</a></h2>
+<p>Through specification files, which include either the uplink specification, the downlink
+specification or the whole device profile specification, it is possible to create rules that
+execute a specific action after an uplink message is read.</p>
+<p>The reason for different types of specification files is that devices are often not able to
+perform actions, therefore just the uplink data is necessary. Also there are devices that
+don’t measure anything, but can execute actions, thus the option for downlink only.<br/>
+In addition it is also possible to load device profiles and devices out of the
+Chirpstack sever. In that case the profile’s specification should not be read via
+the file, but directly from Chirpstack. Then just uplink or downlink specifications are read.</p>
+<p>The specification files are necessary to get the full functionality of this library.</p>
+<h2 id="examples-of-the-different-specification-files"><a href="#examples-of-the-different-specification-files">Examples of the different specification files</a></h2><h3 id="device-profile-specification-file"><a href="#device-profile-specification-file">Device profile specification file</a></h3><div class="example-wrap"><pre class="language-json"><code>{
+  &quot;device_profile&quot;:
+  {
+    &quot;name&quot;: &quot;XXXX&quot;,
+    &quot;supports_class_b&quot;: false,
+    &quot;class_b_timeout&quot;: 0,
+    &quot;ping_slot_period&quot;: 0,
+    &quot;ping_slot_dr&quot;: 0,
+    &quot;ping_slot_freq&quot;: 0,
+    &quot;supports_class_c&quot;: false,
+    &quot;class_c_timeout&quot;: 0,
+    &quot;mac_version&quot;: &quot;1.0.3&quot;,
+    &quot;reg_params_revision&quot;: &quot;&quot;,
+    &quot;rx_delay_1&quot;: 0,
+    &quot;rx_dr_offset_1&quot;: 0,
+    &quot;rx_datarate_2&quot;: 0,
+    &quot;rx_freq_2&quot;: 0,
+    &quot;factory_preset_freqs&quot;:[
+      &quot;86800000&quot;
+    ],
+    &quot;max_eirp&quot;: 14,
+    &quot;max_duty_cycle&quot;: 0,
+    &quot;supports_join&quot;: true,
+    &quot;rf_region&quot;: &quot;EU868&quot;,
+    &quot;supports_32bit_f_cnt&quot;: true,
+    &quot;payload_codec&quot;: &quot;&quot;,
+    &quot;payload_encoder_script&quot;: &quot;&quot;,
+    &quot;payload_decoder_script&quot;: &quot;&quot;,
+    &quot;geoloc_buffer_ttl&quot;: 0,
+    &quot;geoloc_min_buffer_size&quot;: 0,
+    &quot;uplink_interval&quot;: 1200,
+    &quot;adr_algorithm_id&quot;: &quot;0&quot;
+  },
+  &quot;uplink&quot;:
+  {
+    &quot;payloads&quot;: [
+      &quot;current&quot;,
+      &quot;factor&quot;,
+      &quot;power&quot;,
+      &quot;power_sum&quot;,
+      &quot;state&quot;,
+      &quot;voltage&quot;
+    ]
+  },
+  &quot;downlink&quot;:
+  {
+    &quot;hex_pre_byte&quot;: &quot;&quot;,
+    &quot;combined_work_load_count&quot;: false,
+    &quot;payloads&quot;:[
+      {
+       &quot;command_name&quot;: &quot;Open&quot;,
+        &quot;description&quot;: &quot;To open socket&quot;,
+        &quot;configurable&quot;: false,
+        &quot;hex_code&quot;: &quot;080100ff&quot;
+      },
+      {
+        &quot;command_name&quot;: &quot;Close&quot;,
+        &quot;description&quot;: &quot;To close socket&quot;,
+        &quot;configurable&quot;: false,
+        &quot;hex_code&quot;: &quot;080000ff&quot;
+      }
+    ]
+  }
+}
+</code></pre></div><h3 id="downlink-specification-file"><a href="#downlink-specification-file">Downlink specification file</a></h3><div class="example-wrap"><pre class="language-json"><code>{
+  &quot;hex_pre_byte&quot;: &quot;&quot;,
+  &quot;combined_work_load_count&quot;: false,
+  &quot;payloads&quot;:[
+    {
+      &quot;command_name&quot;: &quot;Open&quot;,
+      &quot;description&quot;: &quot;To open socket&quot;,
+      &quot;configurable&quot;: false,
+      &quot;hex_code&quot;: &quot;080100ff&quot;
+    },
+    {
+      &quot;command_name&quot;: &quot;Close&quot;,
+      &quot;description&quot;: &quot;To close socket&quot;,
+      &quot;configurable&quot;: false,
+      &quot;hex_code&quot;: &quot;080000ff&quot;
+    }
+  ]
+}
+</code></pre></div><h3 id="uplink-specification-file"><a href="#uplink-specification-file">Uplink specification file</a></h3><div class="example-wrap"><pre class="language-json"><code>{
+  &quot;payloads&quot;: [
+    &quot;co2&quot;,
+    &quot;humidity&quot;,
+    &quot;light&quot;,
+    &quot;motion&quot;,
+    &quot;temperature&quot;,
+    &quot;vdd&quot;
+  ]
+}
+</code></pre></div></div></details><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="connections/index.html" title="elorapi::connections mod">connections</a></div><div class="item-right docblock-short">This module is for the connection to the Chirpstack server and a MQTT broker. <br/>
+It is necessary to establish these connections to get the full functionality of this library.</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="devices/index.html" title="elorapi::devices mod">devices</a></div><div class="item-right docblock-short">This module is for the management of devices and device profiles.</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="rules/index.html" title="elorapi::rules mod">rules</a></div><div class="item-right docblock-short">This module is for the management of rules and their execution.</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="elorapi" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

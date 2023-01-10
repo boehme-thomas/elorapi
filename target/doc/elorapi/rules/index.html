@@ -1,0 +1,151 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="This module is for the management of rules and their execution."><meta name="keywords" content="rust, rustlang, rust-lang, rules"><title>elorapi::rules - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../elorapi/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../elorapi/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"><a href="#">Module rules</a></h2><div class="sidebar-elems"><section><ul class="block"><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li></ul></section></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn">Module <a href="../index.html">elorapi</a>::<wbr><a class="mod" href="#">rules</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../../src/elorapi/rules.rs.html#1-1423">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>This module is for the management of rules and their execution.</p>
+<p>Note that a rule, when started, will always be executed when possible.
+That means everytime the respective device sends a message and it contains the selected data,
+the action will be executed. The only exception is when a time condition was set.</p>
+<p><code>RuleGenerator</code> contains functions to start a command line program to generate rules.</p>
+<p>In the following the usage of this module will be described with examples.</p>
+<h2 id="examples"><a href="#examples">Examples</a></h2>
+<ul>
+<li><a href="#startup">Startup</a></li>
+<li><a href="#creating-a-rule-depending-on-a-device">Creating a rule depending on a device</a></li>
+<li><a href="#creating-conditions-depending-on-time">Creating conditions depending on time</a></li>
+<li><a href="#start-of-a-rule">Start of a rule</a></li>
+</ul>
+<h3 id="startup"><a href="#startup">Startup</a></h3>
+<p>To use this module it is necessary to create a rule container.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code> <span class="kw">use </span>std::sync::{Arc, Mutex};
+ <span class="kw">use </span>elorapi::rules::RuleContainer;
+
+ <span class="comment">// create a rule container
+ </span><span class="kw">let </span>rule_container_arc_mutex = Arc::new(Mutex::new(RuleContainer::new()));
+ <span class="kw">let </span>rule_container_arc = Arc::clone(<span class="kw-2">&amp;</span>rule_container_arc_mutex);
+ <span class="kw">let </span>rule_container = rule_container_arc.lock().unwrap();</code></pre></div>
+<h3 id="creating-a-rule-depending-on-a-device"><a href="#creating-a-rule-depending-on-a-device">Creating a rule depending on a device</a></h3>
+<p>There a four steps to follow to create a rule:</p>
+<ul>
+<li><strong>Create one or more condition/s</strong><br/>
+Here you need to get device/s out of the device container
+(for more information on this see the <a href="../devices/index.html" title="devices">devices</a> module; here the assumption is made that the device has already been loaded out of the container),<br/>
+the index of the data you want to compare of the uplink message
+(this can either be found in the json specification file of the respective device profile,
+in the uplink message of the device in the chirpstack application sever or
+by using the function <a href="../devices/struct.DeviceProfile.html#method.print_uplink"><code>DeviceProfile::print_uplink</code></a>),<br/>
+the comparison operator and the value to compare to.</li>
+</ul>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code> <span class="kw">use </span>elorapi::rules::{Condition, DeviceCondition, RefValue};
+
+ <span class="comment">// create first condition
+ </span><span class="kw">let </span>index = <span class="number">2</span>;
+ <span class="kw">let </span>comparison_operator = <span class="string">&quot;&lt;=&quot;</span>.to_string();
+ <span class="kw">let </span>comparison_value = RefValue::IntNumber(<span class="number">1</span>);
+ <span class="kw">let </span>condition_one = Condition::Device(DeviceCondition::new(device.clone(), index, comparison_operator, comparison_value));
+
+ <span class="comment">// create second condition
+ </span><span class="kw">let </span>condition_two = Condition::Device(DeviceCondition::new(device, <span class="number">4</span>, <span class="string">&quot;==&quot;</span>.to_string(), RefValue::String(<span class="string">&quot;open&quot;</span>.to_string())));</code></pre></div>
+<ul>
+<li><strong>Create an action</strong><br/>
+To create an action a device is needed, where the action should be executed on,<br/>
+the indices of the <a href="../devices/struct.DownlinkPayload.html"><code>DownlinkPayload</code></a>s, which should be executed
+(this information can be found in the specification file or by using the function
+<a href="../devices/struct.DeviceProfile.html#method.print_downlink"><code>DeviceProfile::print_downlink</code></a>),<br/>
+the message encoded in hexadecimal, which should be sent,<br/>
+and the port to which the message should be sent to.</li>
+</ul>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code> <span class="kw">use </span>elorapi::rules::Action;
+
+ <span class="kw">let </span>indices = <span class="macro">vec!</span>[<span class="number">0</span>];
+ <span class="kw">let </span>message = <span class="string">&quot;message_in_hex&quot;</span>.to_string();
+ <span class="kw">let </span>f_port = <span class="number">55</span>;
+ <span class="kw">let </span>action_one = Action::new(device.clone(), indices, message, f_port);</code></pre></div>
+<ul>
+<li><strong>Create the actual rule</strong><br/>
+Here vectors for all conditions, boolean operators and actions are needed.</li>
+</ul>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code> <span class="kw">use </span>elorapi::rules::Rule;
+
+ <span class="kw">let </span>conditions = <span class="macro">vec!</span>[condition_one, condition_two];
+ <span class="kw">let </span>boolean_operators = <span class="macro">vec!</span>[<span class="string">&quot;&amp;&quot;</span>.to_string()];
+ <span class="kw">let </span>actions = <span class="macro">vec!</span>[action_one];
+ <span class="kw">let </span>rule = Rule::new(conditons, boolean_operators, actions);</code></pre></div>
+<ul>
+<li><strong>Add rule to the container</strong></li>
+</ul>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>rule_container.add_rule(rule);</code></pre></div>
+<h3 id="creating-conditions-depending-on-time"><a href="#creating-conditions-depending-on-time">Creating conditions depending on time</a></h3>
+<p>In this example a rule is created, which should be executed from Monday to Wednesday between 8am and 3pm.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code> <span class="kw">use </span>chrono::{NaiveTime, Weekday};
+ <span class="kw">use </span>elorapi::rules::{Condition, TimeCondition};
+
+ <span class="comment">// time
+ </span><span class="kw">let </span>timespan_start = NaiveTime::from_hms(<span class="number">8</span>, <span class="number">0</span>, <span class="number">0</span>);
+ <span class="kw">let </span>timespan_end = NaiveTime::from_hms(<span class="number">15</span>, <span class="number">0</span>, <span class="number">0</span>);
+
+ <span class="comment">// condition monday
+ </span><span class="kw">let </span>weekday = <span class="prelude-val">Some</span>(Weekday::Mon);
+ <span class="kw">let </span>time_condition = TimeCondition::new(weekday, timespan_start, timespan_end);
+ <span class="kw">let </span>condition_mon = Condition::Time(time_condition);
+
+ <span class="comment">// condition tuesday
+ </span><span class="kw">let </span>condition_tue = Condition::Time(TimeCondition::new(<span class="prelude-val">Some</span>(Weekday::Tue), timespan_start, timespan_end));
+
+ <span class="comment">// condition wednesday
+ </span><span class="kw">let </span>condition_tue = Condition::Time(TimeCondition::new(<span class="prelude-val">Some</span>(Weekday::Wed), timespan_start, timespan_end));</code></pre></div>
+<p>The next example shows the condition, when you want an action to be executed everyday,
+but only in a specific timespan. Here between 11pm and 4pm.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code> <span class="kw">use </span>chrono::NaiveTime;
+ <span class="kw">use </span>elorapi::rules::{Condition, TimeCondition};
+
+ <span class="kw">let </span>timespan_start = NaiveTime::from_hms(<span class="number">23</span>, <span class="number">0</span>, <span class="number">0</span>);
+ <span class="kw">let </span>timespan_end = NaiveTime::from_hms(<span class="number">16</span>, <span class="number">0</span>, <span class="number">0</span>);
+ <span class="kw">let </span>condition = Condition::Time(TimeCondition::new(<span class="prelude-val">None</span>, timespan_start, timespan_end));</code></pre></div>
+<h3 id="start-of-a-rule"><a href="#start-of-a-rule">Start of a rule</a></h3>
+<p>It is necessary to establish a <a href="../connections/struct.Mqtt.html"><code>Mqtt</code></a> connection and a <a href="../connections/struct.ChirpstackConnection.html"><code>ChirpstackConnection</code></a>,
+when a rule should be executed.
+For more information on this see the <a href="../connections/index.html" title="connections">connections</a> module.</p>
+<p>To start all rules you need to have the locked rule container with rules in it,<br/>
+the established mqtt connection,<br/>
+the locked device profile container, which contains at least the device profiles used in the rules,<br/>
+the established container connection
+and the established Chirpstack connection.<br/></p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code> <span class="kw">use </span>elorapi::connections::{ChirpstackConnection, Mqtt};
+ <span class="kw">use </span>elorapi::rules::RuleContainer;
+
+ <span class="comment">// create a Chirpstack connection
+ </span><span class="kw">let </span>chirpstack_connection = ChirpstackConnection::new(<span class="string">&quot;APIToken&quot;</span>, <span class="string">&quot;uri&quot;</span>);
+
+ <span class="comment">// create a Mqtt connection
+ </span><span class="kw">let </span>mqtt = Mqtt::new(<span class="string">&quot;uri&quot;</span>, <span class="string">&quot;username&quot;</span>, <span class="string">&quot;password&quot;</span>);
+ <span class="comment">// this starts receiving the messages from the mqtt broker and publish them into a queue
+ </span><span class="kw">let </span>receiver = mqtt.start_receiving();
+
+ <span class="comment">// establish container connection
+ </span>rule_container.establish_connection(chirpstack_connection.clone()).<span class="kw">await</span>.unwrap();
+
+ <span class="comment">// get rule container client
+ </span><span class="kw">let </span>container_client = rule_container.get_client().unwrap();
+
+ <span class="kw">let </span><span class="kw-2">mut </span>handlers = Vec::new();
+ <span class="comment">// loop to all rules in the container and start them
+ </span><span class="kw">for </span>rule <span class="kw">in </span>rule_container.get_rules() {
+    <span class="comment">// this is necessary due to the loop
+    </span><span class="kw">let </span>mqtt_clone = mqtt.clone();
+    <span class="comment">// this is necessary due to the loop
+    </span><span class="kw">let </span>chirpstack_connection_clone = chirpstack_connection.clone();
+    <span class="comment">// this starts the rule execution of the specific rule
+    </span><span class="kw">let </span>handler = RuleContainer::start_rule_execution(rule, mqtt_clone, <span class="kw-2">&amp;</span>device_profile_container, container_client, chirpstack_connection_clone);
+    handlers.push(handler);
+ }
+
+ <span class="comment">// this is necessary that the associated thread is executed
+ </span><span class="kw">for </span>join_handle <span class="kw">in </span>handlers {
+    join_handle.join().unwrap();
+ }</code></pre></div>
+</div></details><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Action.html" title="elorapi::rules::Action struct">Action</a></div><div class="item-right docblock-short">Action which should be executed, when the <a href="enum.Condition.html" title="Condition"><code>Condition</code></a>s of a <a href="struct.Rule.html" title="Rule"><code>Rule</code></a> are true.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.DeviceCondition.html" title="elorapi::rules::DeviceCondition struct">DeviceCondition</a></div><div class="item-right docblock-short">Condition for a <a href="struct.Rule.html" title="Rule"><code>Rule</code></a> depending on a <a href="../devices/struct.Device.html" title="Device"><code>Device</code></a>.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Rule.html" title="elorapi::rules::Rule struct">Rule</a></div><div class="item-right docblock-short">Representation of a rule.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.RuleContainer.html" title="elorapi::rules::RuleContainer struct">RuleContainer</a></div><div class="item-right docblock-short">To manage <a href="struct.Rule.html" title="Rule"><code>Rule</code></a>s.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.RuleGenerator.html" title="elorapi::rules::RuleGenerator struct">RuleGenerator</a></div><div class="item-right docblock-short">To generate a <a href="struct.Rule.html" title="Rule"><code>Rule</code></a> via a command line application.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.TimeCondition.html" title="elorapi::rules::TimeCondition struct">TimeCondition</a></div><div class="item-right docblock-short">Condition for a <a href="struct.Rule.html" title="Rule"><code>Rule</code></a> depending on time.</div></div></div><h2 id="enums" class="small-section-header"><a href="#enums">Enums</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.Condition.html" title="elorapi::rules::Condition enum">Condition</a></div><div class="item-right docblock-short">Enum for possible conditions of a <a href="struct.Rule.html" title="Rule"><code>Rule</code></a>.</div></div><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.RefValue.html" title="elorapi::rules::RefValue enum">RefValue</a></div><div class="item-right docblock-short">Enum for possible threshold values.</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="elorapi" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

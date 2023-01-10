@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":[["connections","This module is for the connection to the Chirpstack server and a MQTT broker.  It is necessary to establish these connections to get the full functionality of this library."],["devices","This module is for the management of devices and device profiles."],["rules","This module is for the management of rules and their execution."]]};

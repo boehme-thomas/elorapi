@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["ChirpstackConnection","This is to manage the connection to the Chirpstack Application Server."],["Mqtt","This is to manage the connection to a Mqtt broker."]]};
