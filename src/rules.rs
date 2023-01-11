@@ -1,4 +1,4 @@
-use std::borrow::{BorrowMut};
+use std::borrow::{Borrow, BorrowMut};
 use chirpstack_api::as_pb::external::api::{Device as ChirpstackDevice, device_queue_service_client::DeviceQueueServiceClient, DeviceQueueItem, EnqueueDeviceQueueItemRequest};
 use crate::{connections::ChirpstackConnection, devices::{Device, DeviceContainer, DeviceProfile, DeviceProfileContainer}};
 use std::{io, thread};
@@ -1351,6 +1351,21 @@ impl Rule {
     /// Checks if rule is executed.
     pub fn is_running(&self) -> bool{
         return self.running;
+    }
+
+    /// Gets condition.
+    pub fn get_conditions(&self) -> &[Condition] {
+        self.conditions.borrow()
+    }
+
+    /// Get bool_ops.
+    pub fn get_bool_ops(&self) -> &[String] {
+        self.bool_ops.borrow()
+    }
+
+    /// Get actions.
+    pub fn get_action(&self) -> &[Action] {
+        self.actions.borrow()
     }
 
 }
