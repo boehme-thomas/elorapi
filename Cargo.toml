@@ -1,9 +1,8 @@
 [package]
 name = "elorapi"
-version = "0.1.1"
+version = "0.1.2"
 description = "Api to extend functionality of Chirpstack with rule execution."
 edition = "2021"
-author = "Thomas Böhme"
 
 [lib]
 name= "elorapi"

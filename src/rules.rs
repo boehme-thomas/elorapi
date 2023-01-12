@@ -1264,6 +1264,26 @@ impl DeviceCondition {
             threshold
         }
     }
+
+    /// Gets the device from which the data should be used.
+    pub fn get_device(&self) -> &Device {
+        self.device.borrow()
+    }
+
+    /// Gets the index of the data that should be read out of the uplink message.
+    pub fn get_measure_data(&self) -> usize {
+        self.measure_data
+    }
+
+    /// Gets the comparison operator.
+    pub fn get_operator(&self) -> String{
+        self.operator.clone()
+    }
+
+    /// Gets the threshold.
+    pub fn get_threshold(&self) -> &RefValue{
+        self.threshold.borrow()
+    }
 }
 
 /**
@@ -1288,6 +1308,15 @@ impl TimeCondition {
         }
     }
 
+    /// Gets the weekday.
+    pub fn get_weekday(&self) -> Option<Weekday>{
+        self.weekday
+    }
+
+    /// Gets the timespan.
+    pub fn get_timespan(&self) -> [NaiveTime; 2] {
+        self.timespan
+    }
 }
 
 /**
@@ -1317,6 +1346,26 @@ impl Action {
             message,
             f_port
         }
+    }
+
+    /// Gets the device to which the data should be sent.
+    pub fn get_device(&self) -> &Device {
+        self.device.borrow()
+    }
+
+    /// Gets the payload indices of the possible downlinks, that should be used.
+    pub fn get_payload_indices(&self) -> &[usize] {
+        self.payload_indices.borrow()
+    }
+
+    /// Gets the message to sent.
+    pub fn get_message(&self) -> String{
+        self.message.clone()
+    }
+
+    /// Gets the port to which data should be sent.
+    pub fn get_f_port(&self) -> u32 {
+        self.f_port
     }
 }
 
